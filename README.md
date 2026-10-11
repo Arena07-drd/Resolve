@@ -19,8 +19,7 @@ The project prioritizes backend authorization and data isolation, strict request
 9. [Running Tests and Building the Frontend](#9-running-tests-and-building-the-frontend)
 10. [Deployed URLs](#10-deployed-urls)
 11. [MongoDB Query Optimization Experiment](#11-mongodb-query-optimization-experiment)
-12. [AI / Codex-Assisted Development Workflow](#12-ai--codex-assisted-development-workflow)
-13. [Known Limitations and Future Improvements](#13-known-limitations-and-future-improvements)
+12. [Known Limitations and Future Improvements](#12-known-limitations-and-future-improvements)
 
 ---
 
@@ -391,27 +390,8 @@ Measured directly via `node server/scripts/explainQuery.js` prior to adding comp
 
 ---
 
-## 12. AI / Codex-Assisted Development Workflow
 
-This project was developed iteratively using an AI-assisted pair-programming workflow governed by the strict engineering rules in [`AGENTS.md`](AGENTS.md):
-
-1. **Contract-First Inspection**:
-   - Before generating or modifying frontend or backend code, existing Mongoose models, Zod validators, middleware, and route contracts were inspected so that changes remained minimal and backward-compatible.
-2. **Incremental Implementation & Review**:
-   - Features were built in small, isolated phases: (1) plain-CSS React interface wired to existing endpoints, (2) creator-controlled ticket assignment (`assignedTo` and `GET /api/users`), (3) query explain analysis and 10,000-ticket repeatable seed script, (4) compound index creation, and (5) authentication rate limiting.
-3. **Structured Security & Code Audit**:
-   - A full codebase review was conducted across 10 security and reliability categories. Every AI-identified issue was manually reviewed for root cause and verified with reproduction steps and automated tests:
-     - **Timing Attack Mitigation**: Fixed early return in `login()` when an email does not exist by comparing against a precomputed `dummyPasswordHash`.
-     - **Security Headers**: Mounted `helmet()` middleware in `app.js` and added header assertions in `health.test.js`.
-     - **Assignee Referential Integrity**: Added `User.findById()` verification in `createTicket` and `updateTicket` so tickets cannot be assigned to non-existent user IDs (`400 INVALID_ASSIGNEE`).
-     - **Ticket Deletion Ownership**: Implemented `DELETE /api/tickets/:ticketId` enforcing strict creator-only deletion (`204 No Content` for creator, `403 FORBIDDEN` for assignee).
-     - **Frontend 401 Interceptor**: Refined Axios 401 handling so `/auth/register` errors are displayed inline rather than triggering a global redirect.
-4. **Evidence-Based Verification**:
-   - No feature or fix was accepted without executing `npm test --prefix server`, `npm run lint --prefix client`, and `npm run build --prefix client` and inspecting the real terminal output.
-
----
-
-## 13. Known Limitations and Future Improvements
+## 12. Known Limitations and Future Improvements
 
 1. **In-Memory Rate Limiting (`MemoryStore`)**:
    - `express-rate-limit` currently tracks request counts in the Node.js process memory. If the backend is horizontally scaled across multiple server instances behind a load balancer, counters will not be shared across instances. Future improvement: back the rate limiter with Redis (`rate-limit-redis`).
